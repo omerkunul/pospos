@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ["nodejs_20", "npm-9_x"]
+
+[phases.install]
+cmds = ["cd webapp && npm ci"]
+
+[phases.build]
+cmds = ["cd webapp && npm run build"]
+
+[start]
+cmd = "npx -y serve webapp/dist -s -l 3000"
