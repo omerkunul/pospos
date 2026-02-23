@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hotel POS & Folio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>Hotel POS & Folio</h1>
+      <p class="subtitle">Bar / Restoran adisyonlarını odaya yaz, resepsiyonda toplam tahsilat al.</p>
+    </div>
+    <div class="topbar-right">
+      <div id="currentUserBadge" class="user-badge hidden"></div>
+      <button id="logoutBtn" class="btn ghost hidden" type="button">Çıkış</button>
+      <div class="chip">MVP</div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-tab="checkin" data-role="resepsiyon,admin">Check-in</button>
+      <button class="tab" data-tab="pos" data-role="servis,admin">POS</button>
+      <button class="tab" data-tab="checkout" data-role="resepsiyon,admin">Checkout</button>
+      <button class="tab" data-tab="menu" data-role="admin">Menü</button>
+      <button class="tab" data-tab="reports" data-role="resepsiyon,servis,admin">Raporlar</button>
+    </nav>
+
+    <section class="panel active" id="panel-checkin">
+      <div class="card">
+        <h2>Müşteri / Oda Girişi</h2>
+        <form id="checkinForm" class="form-grid">
+          <label>
+            Misafir Ad Soyad
+            <input type="text" id="guestName" placeholder="Örn: Ahmet Yılmaz" required>
+          </label>
+          <label>
+            Telefon
+            <input type="text" id="guestPhone" placeholder="Örn: 0555 000 00 00">
+          </label>
+          <label>
+            Oda Numarası
+            <input type="text" id="roomNumber" placeholder="Örn: 204" required>
+          </label>
+          <label>
+            Planlı Çıkış
+            <input type="date" id="plannedCheckout">
+          </label>
+          <label class="full">
+            Not
+            <textarea id="checkinNote" rows="2" placeholder="Opsiyonel not"></textarea>
+          </label>
+          <div class="full actions">
+            <button type="submit" class="btn primary">Konaklama Aç</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Aktif Konaklamalar</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Oda</th>
+                <th>Misafir</th>
+                <th>Giriş</th>
+                <th>Planlı Çıkış</th>
+                <th>Durum</th>
+              </tr>
+            </thead>
+            <tbody id="activeStaysTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-pos">
+      <div class="card split-2">
+        <div>
+          <h2>Yeni Adisyon</h2>
+          <div class="inline-fields">
+            <label>
+              İşletme
+              <select id="outletSelect"></select>
+            </label>
+            <label>
+              Oda Hesabı
+              <select id="staySelect"></select>
+            </label>
+          </div>
+          <p class="hint">"Yürüyen Müşteri" seçersen sipariş odaya yazılmaz.</p>
+
+          <div class="menu-grid" id="menuGrid"></div>
+        </div>
+
+        <div>
+          <h3>Adisyon Kalemleri</h3>
+          <div id="cartList" class="cart-list"></div>
+          <div class="summary" id="cartTotal">Toplam: 0.00 TL</div>
+          <label>
+            Adisyon Notu
+            <input type="text" id="orderNote" placeholder="Örn: Buzsuz, az şekerli">
+          </label>
+          <div class="actions">
+            <button class="btn primary" id="saveOrderBtn" type="button">Adisyon Kaydet + Yazdır</button>
+            <button class="btn ghost" id="clearCartBtn" type="button">Temizle</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Son Siparişler</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Saat</th>
+                <th>Outlet</th>
+                <th>Oda</th>
+                <th>Tutar</th>
+                <th>İşlem</th>
+              </tr>
+            </thead>
+            <tbody id="recentOrdersTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-checkout">
+      <div class="card">
+        <h2>Resepsiyon Checkout</h2>
+        <div class="inline-fields">
+          <label>
+            Konaklama / Oda
+            <select id="checkoutStaySelect"></select>
+          </label>
+          <button class="btn ghost align-end" id="refreshCheckoutBtn" type="button">Yenile</button>
+        </div>
+      </div>
+
+      <div class="card split-2">
+        <div>
+          <h3>Folio Hareketleri (Adisyonlar)</h3>
+          <div id="folioOrders" class="ledger-list"></div>
+        </div>
+
+        <div>
+          <h3>Ödemeler</h3>
+          <form id="paymentForm" class="form-grid compact">
+            <label>
+              Yöntem
+              <select id="paymentMethod">
+                <option value="nakit">Nakit</option>
+                <option value="kart">Kart</option>
+                <option value="havale">Havale/EFT</option>
+                <option value="diger">Diğer</option>
+              </select>
+            </label>
+            <label>
+              Tutar (TL)
+              <input type="number" id="paymentAmount" step="0.01" min="0.01" required>
+            </label>
+            <label class="full">
+              Not
+              <input type="text" id="paymentNote" placeholder="Opsiyonel">
+            </label>
+            <div class="full actions">
+              <button type="submit" class="btn primary">Ödeme Ekle</button>
+            </div>
+          </form>
+
+          <div id="paymentsList" class="ledger-list"></div>
+
+          <div class="totals card-soft" id="checkoutTotals">
+            <div><span>Toplam Harcama</span><strong id="totalCharges">0.00 TL</strong></div>
+            <div><span>Toplam Ödeme</span><strong id="totalPayments">0.00 TL</strong></div>
+            <div class="balance"><span>Kalan Bakiye</span><strong id="remainingBalance">0.00 TL</strong></div>
+          </div>
+
+          <div class="actions">
+            <button class="btn primary" id="closeStayBtn" type="button">Konaklamayı Kapat</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-menu">
+      <div class="card split-2">
+        <div>
+          <h2>Menüye Ürün Ekle</h2>
+          <form id="menuForm" class="form-grid compact">
+            <label>
+              Outlet
+              <select id="menuOutlet"></select>
+            </label>
+            <label>
+              Kategori
+              <select id="menuCategory">
+                <option value="Burger">Burger</option>
+                <option value="Pizza">Pizza</option>
+                <option value="Ana Yemek">Ana Yemek</option>
+                <option value="Atıştırmalık">Atıştırmalık</option>
+                <option value="Alkolsüz İçecek">Alkolsüz İçecek</option>
+                <option value="Alkollü İçecek">Alkollü İçecek</option>
+                <option value="Tatlı">Tatlı</option>
+              </select>
+            </label>
+            <label>
+              Ürün Adı
+              <input type="text" id="menuName" required>
+            </label>
+            <label>
+              Fiyat (TL)
+              <input type="number" id="menuPrice" min="0" step="0.01" required>
+            </label>
+            <label class="full">
+              Görsel URL (opsiyonel)
+              <input type="url" id="menuImageUrl" placeholder="https://...">
+            </label>
+            <div class="full actions">
+              <button type="submit" class="btn primary">Ürün Ekle</button>
+            </div>
+          </form>
+        </div>
+
+        <div>
+          <h3>Aktif Menü</h3>
+          <div id="menuList" class="ledger-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-reports">
+      <div class="card">
+        <h2>Günlük Rapor</h2>
+        <div class="inline-fields report-filters">
+          <label>
+            Tarih
+            <input type="date" id="reportDate">
+          </label>
+          <div class="actions align-end">
+            <button class="btn ghost" id="refreshReportBtn" type="button">Raporu Yenile</button>
+            <button class="btn primary" id="printReportBtn" type="button">Raporu Yazdır</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="report-cards" id="reportSummaryCards"></div>
+
+      <div class="card split-2">
+        <div>
+          <h3>Outlet Satış Dağılımı</h3>
+          <div id="reportOutletList" class="ledger-list"></div>
+        </div>
+        <div>
+          <h3>Ödeme Yöntemi Dağılımı</h3>
+          <div id="reportPaymentList" class="ledger-list"></div>
+        </div>
+      </div>
+
+      <div class="card split-2">
+        <div>
+          <h3>En Çok Harcayan Odalar</h3>
+          <div id="reportRoomList" class="ledger-list"></div>
+        </div>
+        <div>
+          <h3>Açık Konaklama Alacakları</h3>
+          <div id="reportOpenBalances" class="ledger-list"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <section id="authOverlay" class="auth-overlay">
+    <div class="auth-card">
+      <h2>Personel Girişi</h2>
+      <p class="subtitle">Rol bazlı ekran yetkileri otomatik uygulanır.</p>
+      <form id="loginForm" class="form-grid compact">
+        <label class="full">
+          Kullanıcı Adı
+          <input type="text" id="loginUsername" placeholder="Örn: resepsiyon" required>
+        </label>
+        <label class="full">
+          PIN
+          <input type="password" id="loginPin" placeholder="Örn: 1234" required>
+        </label>
+        <div class="full actions">
+          <button type="submit" class="btn primary">Giriş Yap</button>
+        </div>
+      </form>
+      <p class="hint">Demo hesaplar SQL içinde eklenir: resepsiyon / servis / admin.</p>
+    </div>
+  </section>
+
+  <div id="toast"></div>
+  <section id="printArea" class="print-area"></section>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./config.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
