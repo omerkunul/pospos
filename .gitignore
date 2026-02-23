@@ -41,6 +41,11 @@ pnpm-debug.log*
 .env.local
 .env.*.local
 
+# Sensitive config files (contain API keys)
+static/config.js
+webapp/.env
+webapp/.env.local
+
 # OS
 .DS_Store
 Thumbs.db
