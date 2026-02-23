@@ -8,4 +8,4 @@ cmds = ["cd webapp && npm ci"]
 cmds = ["cd webapp && npm run build"]
 
 [start]
-cmd = "npx -y serve webapp/dist -s -l 3000"
+cmd = "npx -y serve webapp/dist -s -l tcp://0.0.0.0:3000"
