@@ -92,23 +92,7 @@ export function PosWorkspace({ currentUser, locale, onToast, onDataChanged }: Po
     return locale === 'en' ? en : tr
   }
 
-  function categoryLabel(value: string | null | undefined) {
-    const key = value || 'Genel'
-    if (locale !== 'en') return key
 
-    const map: Record<string, string> = {
-      Burger: 'Burger',
-      Pizza: 'Pizza',
-      'Ana Yemek': 'Main Course',
-      Atistirmalik: 'Snack',
-      'Alkolsuz Icecek': 'Soft Drink',
-      'Alkollu Icecek': 'Alcoholic Drink',
-      Tatli: 'Dessert',
-      Genel: 'General',
-    }
-
-    return map[key] || key
-  }
 
   const categoryOptions = useMemo(() => {
     const categories = Array.from(
@@ -207,9 +191,9 @@ export function PosWorkspace({ currentUser, locale, onToast, onDataChanged }: Po
       check_out_plan: string | null
       room: { id: number; room_number: string } | { id: number; room_number: string }[] | null
       guest:
-        | { id: number; full_name: string; phone: string | null }
-        | { id: number; full_name: string; phone: string | null }[]
-        | null
+      | { id: number; full_name: string; phone: string | null }
+      | { id: number; full_name: string; phone: string | null }[]
+      | null
     }>
 
     const stayRows: StayListItem[] = rawStays.map((stay) => ({
@@ -753,9 +737,9 @@ export function PosWorkspace({ currentUser, locale, onToast, onDataChanged }: Po
                 options={
                   filteredStays.length
                     ? filteredStays.map((stay) => ({
-                        value: String(stay.id),
-                        label: `Oda ${stay.room?.room_number || '-'} - ${stay.guest?.full_name || '-'}`,
-                      }))
+                      value: String(stay.id),
+                      label: `Oda ${stay.room?.room_number || '-'} - ${stay.guest?.full_name || '-'}`,
+                    }))
                     : [{ value: '', label: 'Aktif konaklama yok' }]
                 }
                 disabled={!filteredStays.length}
